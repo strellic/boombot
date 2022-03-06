@@ -1,0 +1,42 @@
+{
+  "name": "boombot",
+  "version": "1.0.0",
+  "exports": "./src/index.js",
+  "scripts": {
+    "start": "TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --loader ts-node/esm --experimental-specifier-resolution=node ./src/index.ts",
+    "lint": "eslint './src/**/*' --ext .js,.ts",
+    "lint-fix": "eslint --fix './src/**/*' --ext .js,.ts"
+  },
+  "author": "strellic",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "@discordjs/builders": "^0.12.0",
+    "@discordjs/opus": "^0.5.3",
+    "@discordjs/rest": "^0.3.0",
+    "@discordjs/voice": "^0.8.0",
+    "bufferutil": "^4.0.6",
+    "discord-api-types": "^0.27.3",
+    "discord-ytdl-core": "^5.0.4",
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.0",
+    "erlpack": "github:discord/erlpack",
+    "libsodium-wrappers": "^0.7.9",
+    "utf-8-validate": "^5.0.8",
+    "winston": "^3.6.0",
+    "ytdl-core": "^4.11.0",
+    "ytpl": "^2.2.3",
+    "ytsr": "^3.6.0",
+    "zlib-sync": "^0.1.7"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.13.0",
+    "@typescript-eslint/parser": "^5.13.0",
+    "eslint": "^8.10.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "ts-node": "^10.5.0",
+    "typescript": "^4.5.5"
+  },
+  "type": "module"
+}
