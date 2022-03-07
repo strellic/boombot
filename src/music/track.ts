@@ -1,11 +1,13 @@
 import {
-  AudioResource, createAudioResource, StreamType
-} from '@discordjs/voice';
-import { downloadOptions } from 'ytdl-core';
-import ytdlDiscord from 'discord-ytdl-core';
+  AudioResource,
+  createAudioResource,
+  StreamType,
+} from "@discordjs/voice";
+import { downloadOptions } from "ytdl-core";
+import ytdlDiscord from "discord-ytdl-core";
 
-import log from '../utils/log';
-import type { MediaInfo } from './info';
+import log from "../utils/log";
+import type { MediaInfo } from "./info";
 
 /**
  * This is the data required to create a Track object.
@@ -43,7 +45,7 @@ export class Track implements TrackData {
 
   public readonly author: string;
 
-  public readonly type: 'youtube' | 'direct';
+  public readonly type: "youtube" | "direct";
 
   public readonly startTime: number;
 
@@ -54,13 +56,21 @@ export class Track implements TrackData {
   public readonly onError: (error: Error) => void;
 
   private constructor({
-    url, title, duration, author, startTime, type, onStart, onFinish, onError
+    url,
+    title,
+    duration,
+    author,
+    startTime,
+    type,
+    onStart,
+    onFinish,
+    onError,
   }: TrackData) {
     this.url = url;
     this.title = title;
     this.duration = duration;
     this.author = author;
-    this.type = type as 'youtube' | 'direct';
+    this.type = type as "youtube" | "direct";
 
     this.startTime = startTime || 0;
 
@@ -76,11 +86,11 @@ export class Track implements TrackData {
     log.debug(`Playing track: ${this.title}`);
 
     let stream;
-    if (this.type === 'youtube') {
+    if (this.type === "youtube") {
       const options = {
-        quality: 'highestaudio',
-        filter: 'audioonly',
-        highWaterMark: 33554432 // 1 << 25
+        quality: "highestaudio",
+        filter: "audioonly",
+        highWaterMark: 33554432, // 1 << 25
       } as downloadOptions;
 
       if (this.startTime !== 0) {
@@ -90,30 +100,33 @@ export class Track implements TrackData {
       stream = ytdlDiscord(this.url, {
         ...options,
         opusEncoded: true,
-        seek: this.startTime
+        seek: this.startTime,
       });
     } else {
       stream = ytdlDiscord.arbitraryStream(this.url, {
         opusEncoded: true,
-        seek: this.startTime
+        seek: this.startTime,
       });
     }
 
     return createAudioResource(stream, {
       inputType: StreamType.Opus,
-      metadata: this
+      metadata: this,
     });
   }
 
   /**
-    * Creates a Track from a MediaInfo and lifecycle callback methods.
-    *
-    * @param url The URL of the video
-    * @param methods Lifecycle callbacks
-    *
-    * @returns The created Track
-    */
-  public static from(info: MediaInfo, methods: Pick<Track, 'onStart' | 'onFinish' | 'onError'>): Track {
+   * Creates a Track from a MediaInfo and lifecycle callback methods.
+   *
+   * @param url The URL of the video
+   * @param methods Lifecycle callbacks
+   *
+   * @returns The created Track
+   */
+  public static from(
+    info: MediaInfo,
+    methods: Pick<Track, "onStart" | "onFinish" | "onError">
+  ): Track {
     const wrappedMethods = {
       onStart() {
         wrappedMethods.onStart = noop;
@@ -126,12 +139,12 @@ export class Track implements TrackData {
       onError(error: Error) {
         wrappedMethods.onError = noop;
         methods.onError(error);
-      }
+      },
     };
 
     return new Track({
       ...info,
-      ...wrappedMethods
+      ...wrappedMethods,
     });
   }
 }

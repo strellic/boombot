@@ -1,19 +1,22 @@
-import discord from 'discord.js';
+import discord from "discord.js";
 import {
-  entersState, VoiceConnectionStatus, joinVoiceChannel, AudioPlayerStatus
-} from '@discordjs/voice';
+  entersState,
+  VoiceConnectionStatus,
+  joinVoiceChannel,
+  AudioPlayerStatus,
+} from "@discordjs/voice";
 
-import MusicSubscription from '../music/subscription';
-import type CustomClient from './state';
-import { Track } from '../music/track';
-import type { MediaInfo } from '../music/info';
-import log from './log';
+import MusicSubscription from "../music/subscription";
+import type CustomClient from "./state";
+import { Track } from "../music/track";
+import type { MediaInfo } from "../music/info";
+import log from "./log";
 
 interface PlayOptions {
-  startTime?: number,
-  insertFront?: boolean,
-  hideInsertMessages?: boolean,
-  startIndex?: number
+  startTime?: number;
+  insertFront?: boolean;
+  hideInsertMessages?: boolean;
+  startIndex?: number;
 }
 
 const queue = async (
@@ -27,10 +30,16 @@ const queue = async (
 
   if (subscription.audioPlayer.state.status !== AudioPlayerStatus.Playing) {
     try {
-      await entersState(subscription.voiceConnection, VoiceConnectionStatus.Ready, 20e3);
+      await entersState(
+        subscription.voiceConnection,
+        VoiceConnectionStatus.Ready,
+        20e3
+      );
     } catch (error) {
       log.warn(error);
-      await send('Failed to join voice channel within 20 seconds, please try again later!');
+      await send(
+        "Failed to join voice channel within 20 seconds, please try again later!"
+      );
       return;
     }
   }
@@ -48,7 +57,7 @@ const queue = async (
       onError(error: Error) {
         log.warn(error);
         send(`Error: ${error.message}`).catch(log.warn);
-      }
+      },
     };
 
     const trackInfo = info;
@@ -74,7 +83,7 @@ const queue = async (
     log.warn(error);
 
     if (!options || !options.hideInsertMessages) {
-      await send('Failed to play track, please try again later!');
+      await send("Failed to play track, please try again later!");
     }
   }
 };
@@ -115,11 +124,11 @@ const createSubscription = (
     joinVoiceChannel({
       channelId: voiceChannel.id,
       guildId: voiceChannel.guild.id,
-      adapterCreator: voiceChannel.guild.voiceAdapterCreator
+      adapterCreator: voiceChannel.guild.voiceAdapterCreator,
     }),
     textChannel
   );
-  subscription.voiceConnection.on('error', (error: Error) => {
+  subscription.voiceConnection.on("error", (error: Error) => {
     log.warn(error);
   });
   client.data.subscriptions.set(voiceChannel.guild.id, subscription);

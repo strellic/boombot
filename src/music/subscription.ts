@@ -1,4 +1,4 @@
-import discord from 'discord.js';
+import discord from "discord.js";
 import {
   AudioPlayer,
   AudioPlayerStatus,
@@ -10,12 +10,12 @@ import {
   VoiceConnectionStatus,
   VoiceConnectionState,
   AudioPlayerState,
-  AudioPlayerError
-} from '@discordjs/voice';
-import { promisify } from 'node:util';
-import type { Track } from './track';
+  AudioPlayerError,
+} from "@discordjs/voice";
+import { promisify } from "node:util";
+import type { Track } from "./track";
 
-import type CustomClient from '../utils/state';
+import type CustomClient from "../utils/state";
 
 const wait = promisify(setTimeout);
 
@@ -63,21 +63,27 @@ class MusicSubscription {
     this.client = client;
 
     this.voiceConnection.on(
-      'stateChange',
+      "stateChange",
       async (oldState: VoiceConnectionState, state: VoiceConnectionState) => {
         if (state.status === VoiceConnectionStatus.Disconnected) {
-          if (state.reason === VoiceConnectionDisconnectReason.WebSocketClose
-            && state.closeCode === 4014) {
+          if (
+            state.reason === VoiceConnectionDisconnectReason.WebSocketClose &&
+            state.closeCode === 4014
+          ) {
             /**
-              * If the WebSocket closed with a 4014 code, this means that we should not
-              * manually attempt to reconnect, but there is a chance the connection will
-              * recover itself if the reason of the disconnect was due to switching voice
-              * channels. This is also the same code for the bot being kicked from the voice
-              * channel, so we allow 5 seconds to figure out which scenario it is. If the
-              * bot has been kicked, we should destroy the voice connection.
-              */
+             * If the WebSocket closed with a 4014 code, this means that we should not
+             * manually attempt to reconnect, but there is a chance the connection will
+             * recover itself if the reason of the disconnect was due to switching voice
+             * channels. This is also the same code for the bot being kicked from the voice
+             * channel, so we allow 5 seconds to figure out which scenario it is. If the
+             * bot has been kicked, we should destroy the voice connection.
+             */
             try {
-              await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, 5_000);
+              await entersState(
+                this.voiceConnection,
+                VoiceConnectionStatus.Connecting,
+                5_000
+              );
               // Probably moved voice channel
             } catch {
               this.voiceConnection.destroy();
@@ -103,21 +109,28 @@ class MusicSubscription {
            */
           this.stop();
         } else if (
-          !this.readyLock
-            && (state.status === VoiceConnectionStatus.Connecting
-              || state.status === VoiceConnectionStatus.Signalling)
+          !this.readyLock &&
+          (state.status === VoiceConnectionStatus.Connecting ||
+            state.status === VoiceConnectionStatus.Signalling)
         ) {
           /**
-            * In the Signalling or Connecting states, we set a 20 second time
-            * limit for the connection to become ready before destroying the
-            * voice connection. This stops the voice connection permanently
-            * existing in one of these states.
-            */
+           * In the Signalling or Connecting states, we set a 20 second time
+           * limit for the connection to become ready before destroying the
+           * voice connection. This stops the voice connection permanently
+           * existing in one of these states.
+           */
           this.readyLock = true;
           try {
-            await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20_000);
+            await entersState(
+              this.voiceConnection,
+              VoiceConnectionStatus.Ready,
+              20_000
+            );
           } catch {
-            if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) {
+            if (
+              this.voiceConnection.state.status !==
+              VoiceConnectionStatus.Destroyed
+            ) {
               this.voiceConnection.destroy();
             }
           } finally {
@@ -129,9 +142,12 @@ class MusicSubscription {
 
     // Configure audio player
     this.audioPlayer.on(
-      'stateChange',
+      "stateChange",
       (oldState: AudioPlayerState, state: AudioPlayerState) => {
-        if (state.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
+        if (
+          state.status === AudioPlayerStatus.Idle &&
+          oldState.status !== AudioPlayerStatus.Idle
+        ) {
           // If the Idle state is entered from a non-Idle state,
           // it means that an audio resource has finished playing.
           // The queue is then processed to start playing the next track, if one is available.
@@ -144,16 +160,18 @@ class MusicSubscription {
       }
     );
 
-    this.audioPlayer.on('error', (error: AudioPlayerError) => (error.resource as AudioResource<Track>).metadata.onError(error));
+    this.audioPlayer.on("error", (error: AudioPlayerError) =>
+      (error.resource as AudioResource<Track>).metadata.onError(error)
+    );
 
     voiceConnection.subscribe(this.audioPlayer);
   }
 
   /**
-    * Adds a new Track to the queue.
-    *
-    * @param track The track to add to the queue
-    */
+   * Adds a new Track to the queue.
+   *
+   * @param track The track to add to the queue
+   */
   public async enqueue(track: Track) {
     this.queue.push(track);
     await this.processQueue();
@@ -184,8 +202,8 @@ class MusicSubscription {
   }
 
   /**
-     * Stops audio playback and empties the queue.
-     */
+   * Stops audio playback and empties the queue.
+   */
   public stop() {
     this.queueLock = true;
     this.queue = [];
@@ -193,14 +211,16 @@ class MusicSubscription {
   }
 
   /**
-     * Attempts to play a Track from the queue.
-     */
+   * Attempts to play a Track from the queue.
+   */
   private async processQueue(): Promise<void> {
     // If the queue is locked (already being processed), is empty,
     // or the audio player is already playing something, return
-    if (this.queueLock
-      || this.audioPlayer.state.status !== AudioPlayerStatus.Idle
-      || this.queue.length === 0) {
+    if (
+      this.queueLock ||
+      this.audioPlayer.state.status !== AudioPlayerStatus.Idle ||
+      this.queue.length === 0
+    ) {
       return;
     }
     // Lock the queue to guarantee safe access
@@ -234,7 +254,10 @@ class MusicSubscription {
 
     const ONE_MIN = 60000;
 
-    if (this.audioPlayer.state.status === AudioPlayerStatus.Playing || this.queue.length !== 0) {
+    if (
+      this.audioPlayer.state.status === AudioPlayerStatus.Playing ||
+      this.queue.length !== 0
+    ) {
       this.lastPlayTime = new Date();
       return;
     }
@@ -243,14 +266,14 @@ class MusicSubscription {
       if (!this.lastPlayTime) {
         this.voiceConnection.destroy();
         this.client.data.subscriptions.delete(this.outputChannel.guild.id);
-        this.outputChannel.send('Disconnecting due to inactivity...');
+        this.outputChannel.send("Disconnecting due to inactivity...");
       } else {
         const lastPlayAt = this.lastPlayTime.getTime();
 
         if (time > lastPlayAt + 4 * ONE_MIN) {
           this.voiceConnection.destroy();
           this.client.data.subscriptions.delete(this.outputChannel.guild.id);
-          this.outputChannel.send('Disconnecting due to inactivity...');
+          this.outputChannel.send("Disconnecting due to inactivity...");
         }
       }
     }

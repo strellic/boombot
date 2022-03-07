@@ -1,28 +1,36 @@
-import discord from 'discord.js';
+import discord from "discord.js";
 
-import config from './config';
-import CustomClient from './utils/state';
-import log from './utils/log';
-import type { CustomInteraction, CustomCommandInteraction } from './utils/helpers';
+import config from "./config";
+import CustomClient from "./utils/state";
+import log from "./utils/log";
+import type {
+  CustomInteraction,
+  CustomCommandInteraction,
+} from "./utils/helpers";
 
 if (!config.init()) {
-  log.error('Missing required configuration options, exiting...');
+  log.error("Missing required configuration options, exiting...");
   process.exit(1);
 }
 
 const bot = new CustomClient({
-  intents: [discord.Intents.FLAGS.GUILDS, discord.Intents.FLAGS.GUILD_VOICE_STATES]
+  intents: [
+    discord.Intents.FLAGS.GUILDS,
+    discord.Intents.FLAGS.GUILD_VOICE_STATES,
+  ],
 });
 
-bot.once('ready', async () => {
+bot.once("ready", async () => {
   await bot.initCommands();
-  log.info('BoomBot ready!');
+  log.info("BoomBot ready!");
 });
 
-bot.on('interactionCreate', async (baseInteraction: discord.Interaction) => {
-  if (!baseInteraction.user
-    || !baseInteraction.guild
-    || !baseInteraction.member) {
+bot.on("interactionCreate", async (baseInteraction: discord.Interaction) => {
+  if (
+    !baseInteraction.user ||
+    !baseInteraction.guild ||
+    !baseInteraction.member
+  ) {
     log.info(baseInteraction);
     return;
   }
@@ -45,7 +53,10 @@ bot.on('interactionCreate', async (baseInteraction: discord.Interaction) => {
       await command.execute(bot, cmdInteraction);
     } catch (error) {
       log.error(error);
-      await cmdInteraction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+      await cmdInteraction.followUp({
+        content: "There was an error while executing this command!",
+        ephemeral: true,
+      });
     }
   }
 

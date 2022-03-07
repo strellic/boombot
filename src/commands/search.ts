@@ -1,24 +1,30 @@
-import discord from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
-import type ytsr from 'ytsr';
+import discord from "discord.js";
+import { SlashCommandBuilder } from "@discordjs/builders";
+import type ytsr from "ytsr";
 
-import type { CustomCommandInteraction } from '../utils/helpers';
-import youtube from '../utils/youtube';
-import type CustomClient from '../utils/state';
-import info from '../music/info';
-import voice from '../utils/voice';
+import type { CustomCommandInteraction } from "../utils/helpers";
+import youtube from "../utils/youtube";
+import type CustomClient from "../utils/state";
+import info from "../music/info";
+import voice from "../utils/voice";
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('search')
-    .setDescription('Searches YouTube for a video')
-    .addStringOption((option) => option.setName('query')
-      .setDescription('The query to search for')
-      .setRequired(true)),
+    .setName("search")
+    .setDescription("Searches YouTube for a video")
+    .addStringOption((option) =>
+      option
+        .setName("query")
+        .setDescription("The query to search for")
+        .setRequired(true)
+    ),
   async execute(client: CustomClient, interaction: CustomCommandInteraction) {
-    const query: string | null = interaction.options.getString('query');
+    const query: string | null = interaction.options.getString("query");
     if (!query) {
-      await interaction.reply({ content: 'Missing search query.', ephemeral: true });
+      await interaction.reply({
+        content: "Missing search query.",
+        ephemeral: true,
+      });
       return;
     }
 
@@ -30,7 +36,10 @@ export default {
       const videoList = youtube.videoListGenerator(videos, pageNum);
       if (videos.length === 0 || !videoList) {
         await interaction.deleteReply();
-        await interaction.followUp({ content: 'No search results found!', ephemeral: true });
+        await interaction.followUp({
+          content: "No search results found!",
+          ephemeral: true,
+        });
         return;
       }
 
@@ -41,7 +50,10 @@ export default {
       await (msg as discord.Message).delete();
 
       if (timeout || !result) {
-        await interaction.followUp({ content: 'Search timed out...', ephemeral: true });
+        await interaction.followUp({
+          content: "Search timed out...",
+          ephemeral: true,
+        });
         return;
       }
 
@@ -59,7 +71,10 @@ export default {
         const video = videos.find((v) => v.id === id);
 
         if (!video) {
-          await result.reply({ content: 'There was an error selecting that video!', ephemeral: true });
+          await result.reply({
+            content: "There was an error selecting that video!",
+            ephemeral: true,
+          });
           return;
         }
 
@@ -69,7 +84,10 @@ export default {
           const voiceChannel = await user.voice.channel;
 
           if (!voiceChannel) {
-            await result.reply({ content: 'Please join a voice channel first!', ephemeral: true });
+            await result.reply({
+              content: "Please join a voice channel first!",
+              ephemeral: true,
+            });
             return;
           }
 
@@ -85,5 +103,5 @@ export default {
     };
 
     displayResults(response);
-  }
+  },
 };

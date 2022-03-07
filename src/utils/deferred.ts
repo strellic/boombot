@@ -1,6 +1,6 @@
 interface Deferrable<T> {
-  timeout: boolean
-  result?: T
+  timeout: boolean;
+  result?: T;
 }
 
 export class Deferred<T> {
@@ -10,22 +10,26 @@ export class Deferred<T> {
 
   public reject: (_: Error) => void;
 
-  constructor({ onResolve, timeout }: { onResolve?: () => void, timeout: number }) {
+  constructor({
+    onResolve,
+    timeout,
+  }: {
+    onResolve?: () => void;
+    timeout: number;
+  }) {
     this.resolve = (_: Deferrable<T>): void => {};
     this.reject = (_: Error): void => {};
 
-    const race = new Promise<Deferrable<T>>(
-      (resolve) => {
-        setTimeout(() => resolve({ timeout: true }), timeout * 1000);
-      }
-    );
+    const race = new Promise<Deferrable<T>>((resolve) => {
+      setTimeout(() => resolve({ timeout: true }), timeout * 1000);
+    });
 
     this.promise = Promise.race([
       new Promise<Deferrable<T>>((resolve, reject) => {
         this.reject = reject;
         this.resolve = resolve;
       }),
-      race
+      race,
     ]);
 
     if (onResolve) {

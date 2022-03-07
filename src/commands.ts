@@ -1,27 +1,33 @@
-import discord from 'discord.js';
-import { REST } from '@discordjs/rest';
-import builders from '@discordjs/builders';
-import { Routes } from 'discord-api-types/v9';
-import fs from 'fs';
+import discord from "discord.js";
+import { REST } from "@discordjs/rest";
+import builders from "@discordjs/builders";
+import { Routes } from "discord-api-types/v9";
+import fs from "fs";
 
-import type CustomClient from './utils/state';
-import config from './config';
-import log from './utils/log';
+import type CustomClient from "./utils/state";
+import config from "./config";
+import log from "./utils/log";
 
 interface Command {
-    data: builders.SlashCommandBuilder,
-    execute(client: CustomClient, interaction: discord.CommandInteraction): Promise<void>
+  data: builders.SlashCommandBuilder;
+  execute(
+    client: CustomClient,
+    interaction: discord.CommandInteraction
+  ): Promise<void>;
 }
 
-const commandFiles = fs.readdirSync('./src/commands/')
-  .filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
+const commandFiles = fs
+  .readdirSync("./src/commands/")
+  .filter((file) => file.endsWith(".js") || file.endsWith(".ts"));
 const commands: Command[] = [];
 
 const init = async (collection: discord.Collection<string, Command>) => {
   const promises: Promise<any>[] = [];
   commandFiles.forEach((file) => promises.push(import(`./commands/${file}`)));
 
-  const modules: Command[] = (await Promise.all(promises)).map((m: any) => m.default);
+  const modules: Command[] = (await Promise.all(promises)).map(
+    (m: any) => m.default
+  );
   modules.forEach((cmd) => {
     commands.push(cmd);
     collection.set(cmd.data.name, cmd);
@@ -29,7 +35,7 @@ const init = async (collection: discord.Collection<string, Command>) => {
 };
 
 const deploy = async () => {
-  const rest = new REST({ version: '9' }).setToken(config.token);
+  const rest = new REST({ version: "9" }).setToken(config.token);
   const body = commands.map((c) => c.data.toJSON());
 
   let route = Routes.applicationCommands(config.clientId);
@@ -51,7 +57,7 @@ const deploy = async () => {
  */
 
   await rest.put(route, { body }).catch(log.error);
-  log.info('Commands deployed!');
+  log.info("Commands deployed!");
 };
 
 export type { Command };
