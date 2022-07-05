@@ -12,6 +12,7 @@ interface MediaInfo {
 
   duration?: number;
   startTime?: number;
+  customFFmpegArgs?: string[];
 }
 
 const ytsrToInfo = (video: ytsr.Video): MediaInfo => ({

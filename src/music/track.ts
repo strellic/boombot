@@ -49,6 +49,8 @@ export class Track implements TrackData {
 
   public readonly startTime: number;
 
+  public readonly customFFmpegArgs?: string[];
+
   public readonly onStart: () => void;
 
   public readonly onFinish: () => void;
@@ -61,6 +63,7 @@ export class Track implements TrackData {
     duration,
     author,
     startTime,
+    customFFmpegArgs,
     type,
     onStart,
     onFinish,
@@ -74,6 +77,8 @@ export class Track implements TrackData {
 
     this.startTime = startTime || 0;
 
+    if (customFFmpegArgs) this.customFFmpegArgs = customFFmpegArgs;
+
     this.onStart = onStart;
     this.onFinish = onFinish;
     this.onError = onError;
@@ -86,6 +91,8 @@ export class Track implements TrackData {
     log.debug(`Playing track: ${this.title}`);
 
     let stream;
+    const encoderArgs = this.customFFmpegArgs || [];
+
     if (this.type === "youtube") {
       const options = {
         quality: "highestaudio",
@@ -101,11 +108,13 @@ export class Track implements TrackData {
         ...options,
         opusEncoded: true,
         seek: this.startTime,
+        encoderArgs,
       });
     } else {
       stream = ytdlDiscord.arbitraryStream(this.url, {
         opusEncoded: true,
         seek: this.startTime,
+        encoderArgs,
       });
     }
 

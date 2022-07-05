@@ -42,7 +42,11 @@ class MusicSubscription {
 
   public lastPlayTime: Date | null;
 
+  public lastStartTime: Date | null;
+
   public creationTime: Date;
+
+  public paused: Boolean;
 
   public client: CustomClient;
 
@@ -58,7 +62,10 @@ class MusicSubscription {
     this.track = undefined;
 
     this.lastPlayTime = null;
+    this.lastStartTime = null;
     this.creationTime = new Date();
+
+    this.paused = false;
 
     this.client = client;
 
@@ -234,6 +241,7 @@ class MusicSubscription {
     }
 
     this.lastPlayTime = new Date();
+    this.lastStartTime = new Date();
 
     try {
       // Attempt to convert the Track into an AudioResource (i.e. start streaming the video)
@@ -270,7 +278,9 @@ class MusicSubscription {
       } else {
         const lastPlayAt = this.lastPlayTime.getTime();
 
-        if (time > lastPlayAt + 4 * ONE_MIN) {
+        const minutes = this.paused ? 8 : 4;
+
+        if (time > lastPlayAt + minutes * ONE_MIN) {
           this.voiceConnection.destroy();
           this.client.data.subscriptions.delete(this.outputChannel.guild.id);
           this.outputChannel.send("Disconnecting due to inactivity...");

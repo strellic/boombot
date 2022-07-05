@@ -16,9 +16,9 @@ const videoToEmbed = (video: ytsr.Video): discord.MessageEmbed => {
 
   embed.setURL(`https://youtube.com/watch?v=${encodeURIComponent(video.id)}`);
 
-  let descArr = [video?.author?.name, video.uploadedAt, video.duration];
-  let desc = descArr.flatMap(s => s ? s : []).join("\n");
-  if(desc) {
+  const descArr = [video?.author?.name, video.uploadedAt, video.duration];
+  const desc = descArr.flatMap((s) => s || []).join("\n");
+  if (desc) {
     embed.setDescription(desc);
   }
 

@@ -16,6 +16,7 @@ interface PlayOptions {
   startTime?: number;
   insertFront?: boolean;
   hideInsertMessages?: boolean;
+  customFFmpegArgs?: string[];
   startIndex?: number;
 }
 
@@ -64,6 +65,10 @@ const queue = async (
     if (options && options.startTime) {
       trackInfo.startTime = options.startTime;
       trackOptions.onStart = () => {};
+    }
+
+    if (options && options.customFFmpegArgs) {
+      trackInfo.customFFmpegArgs = options.customFFmpegArgs;
     }
 
     track = Track.from(info, trackOptions);

@@ -6,6 +6,7 @@ This really has no special features.
 ## Features
 * Plays YouTube videos, shorts, and playlists
 * Can also play direct media
+* Custom speed / nightcore support
 
 ## Setup
 Docker (recommended)
