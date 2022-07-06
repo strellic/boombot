@@ -11,13 +11,13 @@ export default {
     .addStringOption((option) =>
       option
         .setName("rate")
-        .setDescription("A custom nightcore rate (default: 1.4)")
+        .setDescription("A custom nightcore rate (default: 1.5)")
         .setRequired(false)
     ),
   async execute(client: CustomClient, interaction: CustomCommandInteraction) {
     const rate: string | null = interaction.options.getString("rate");
 
-    let multiplier = 1.4;
+    let multiplier = 1.5;
     if (rate) {
       multiplier = parseFloat(rate);
       if (Number.isNaN(multiplier)) {
@@ -53,12 +53,15 @@ export default {
       await voice.queue(subscription, track, interaction.user.username, {
         insertFront: true,
         startTime,
-        customFFmpegArgs: ["-filter:a", `asetrate=44100*${multiplier}`],
+        customFFmpegArgs: [
+          "-filter:a",
+          `rubberband=pitch=${multiplier},rubberband=tempo=${multiplier}`,
+        ],
         hideInsertMessages: true,
       });
       subscription.audioPlayer.stop();
 
-      if (multiplier === 1.4) {
+      if (multiplier === 1.5) {
         await interaction.reply(
           `Playing **${track.title}** in **nightcore**...`
         );

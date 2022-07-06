@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 
 import type CustomClient from "../utils/state";
 import type { CustomCommandInteraction } from "../utils/helpers";
+import type { PlayOptions } from "../utils/voice";
 import voice from "../utils/voice";
 import helpers from "../utils/helpers";
 
@@ -43,11 +44,23 @@ export default {
         return;
       }
 
-      await voice.queue(subscription, track, interaction.user.username, {
+      const playOptions: PlayOptions = {
         insertFront: true,
-        startTime: secs,
         hideInsertMessages: true,
-      });
+        startTime: secs,
+      };
+
+      if (secs === 0) {
+        // idk
+        playOptions.startTime = 0.01;
+      }
+
+      await voice.queue(
+        subscription,
+        track,
+        interaction.user.username,
+        playOptions
+      );
       subscription.audioPlayer.stop();
 
       if (time.includes(":")) {
