@@ -17,8 +17,8 @@ RUN npm install --loglevel verbose
 # deploy phase
 FROM node:alpine
 
-RUN apk update
-RUN apk add --no-cache ffmpeg
+COPY --from=mwader/static-ffmpeg:5.0.1-3 /ffmpeg /usr/local/bin/
+COPY --from=mwader/static-ffmpeg:5.0.1-3 /ffprobe /usr/local/bin/
 
 WORKDIR /app
 

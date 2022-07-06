@@ -52,7 +52,7 @@ export default {
 
       const startTime =
         (new Date().getTime() - (subscription.lastStartTime?.getTime() || 0)) /
-        1000;
+        1000 / multiplier;
 
       await voice.queue(subscription, track, interaction.user.username, {
         insertFront: true,
